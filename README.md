@@ -24,3 +24,7 @@ Foram parametrizados 1000 usuários virtuais durante o intervalo de 6 minutos
 Lambda
 
 ![lambdas](./img/1000_lambdas.png)
+
+## Swagger
+
+![swagger](./img/swagger.png)

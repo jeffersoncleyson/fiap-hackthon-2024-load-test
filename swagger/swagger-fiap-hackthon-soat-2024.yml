@@ -1,0 +1,289 @@
+openapi: 3.0.0
+info:
+  title: FIAP Hackaton SOAT 2024 - API
+  description: |-
+    Este documento é fruto de um desafio proposto pela Postech | Fiap | Arquitetura de Software para a elaboração de um projeto de software na modalidade hackathon. O objetivo é desenvolver a arquitetura e o MVP para uma solução de controle de ponto destinada a uma companhia fictícia, Hackaton Company SA, com mais de 100.000 colaboradores. No cenário apresentado, a solução de controle de ponto utilizada pela empresa enfrenta problemas frequentes de desempenho e disponibilidade, além de custos mensais por usuário muito elevados.
+  version: 1.0.0
+
+servers:
+  - url: "https://55vc6lpxhd.execute-api.us-east-1.amazonaws.com/dev"
+paths:
+  /login:
+    post:
+      summary: "Login"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "12345678900"
+                password:
+                  type: string
+                  example: "hackthon-fiap-20241"
+      responses:
+        "200":
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovLzU1dmM2bHB4aGQuZXhlY3V0ZS1hcGkudXMtZWFzdC0xLmFtYXpvbmF3cy5jb20vZGV2L2xvZ2luIiwic2lkIjoiNjVmZTFlNGU2ZWI2MjM0ZmVjMjFjNjM2IiwidHlwIjoiQmVhcmVyIiwiZXhwIjoxNzExMTU3Mjk1LCJpYXQiOjE3MTExNTY5OTV9.SZSuRu3kgDY859lCw6zkjYpS_7nwN4d1-M0aC-JkDbw"
+                  token_type:
+                    type: string
+                    example: "Bearer"
+                  expires_in:
+                    type: integer
+                    example: 300
+
+  /usuario/create:
+    post:
+      summary: "Create Usuario"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "12345678900"
+                password:
+                  type: string
+                  example: "hackthon-fiap-20241"
+                role:
+                  type: string
+                  example: "USER"
+      responses:
+        "201":
+          description: User created
+        "400":
+          description: Username already exists
+
+  /usuario/username/{username}:
+    patch:
+      summary: "Update Usuario"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 12345678900
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  example: "hackthon-fiap-20241"
+                role:
+                  type: string
+                  example: "ADMIN"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: "Usuário atualizado com sucesso."
+
+    get:
+      summary: "Find Usuario By Username"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 12345678900
+      responses:
+        "200":
+          description: User found
+
+    delete:
+      summary: "Remove Usuario By Username"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 12345678901
+      responses:
+        "200":
+          description: User removed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: "Documento excluído com sucesso."
+
+  /ponto/create:
+    post:
+      summary: "Create Ponto"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "201":
+          description: Ponto created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  timestamp:
+                    type: string
+                example:
+                  message: "Ponto registrado com sucesso."
+                  timestamp: "23:32"
+
+  /ponto/read/date:
+    get:
+      summary: "Read By Date Ponto"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: x-date
+          in: header
+          required: true
+          schema:
+            type: string
+            example: "25-12-2024"
+          description: "Date in format DD-MM-YYYY"
+      responses:
+        "200":
+          description: Ponto data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    data:
+                      type: string
+                    hours:
+                      type: array
+                      items:
+                        type: string
+                    total_hours:
+                      type: number
+                example:
+                  - data: "18-03-2024"
+                    hours:
+                      - "08:00"
+                      - "12:00"
+                      - "13:00"
+                      - "14:33"
+                    total_hours: 5.55
+
+  /ponto/read/period:
+    get:
+      summary: "Read By Period Ponto"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: x-period
+          in: header
+          required: true
+          schema:
+            type: string
+            example: "DAY"
+          description: "Period values: DAY, WEEK, MONTH"
+      responses:
+        "200":
+          description: Ponto data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    data:
+                      type: string
+                    hours:
+                      type: array
+                      items:
+                        type: string
+                    total_hours:
+                      type: number
+                example:
+                  - data: "18-03-2024"
+                    hours:
+                      - "08:00"
+                      - "12:00"
+                      - "13:00"
+                      - "14:33"
+                    total_hours: 5.55
+
+  /report:
+    post:
+      summary: "Create Relatorio"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "meu.email123@gmail.com"
+      responses:
+        "201":
+          description: Report created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: "Relatório enviado com sucesso."
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
